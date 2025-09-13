@@ -6,6 +6,6 @@
     }
   ],
   "require": {
-    "audrydpt/tabt-api-client": "dev-main"
+    "audrydpt/tabt-api-client": "dev-master"
   }
 }
