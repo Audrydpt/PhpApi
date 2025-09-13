@@ -1,11 +1,11 @@
 {
   "repositories": [
     {
-     "type": "vcs",
-     "url": "https://github.com/Audrydpt/TabtApiClientPHP"
-   }
+      "type": "vcs",
+      "url": "https://github.com/Audrydpt/TabtApiClientPHP.git"
+    }
   ],
   "require": {
-    "yoerioptr/tabt-api-client": "^2.0"
+    "audrydpt/tabt-api-client": "dev-main"
   }
 }
