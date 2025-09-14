@@ -59,13 +59,28 @@ try {
                 if (!empty($venueEntries)) {
                     $venues = [];
                     foreach ($venueEntries as $venue) {
+                        // Fonction helper pour récupérer une propriété de manière sécurisée
+                        $getProperty = function($getter, $fallback = '') use ($venue) {
+                            try {
+                                return $venue->$getter();
+                            } catch (Error $e) {
+                                return $fallback;
+                            }
+                        };
+
+                        $name = $getProperty('getName');
+                        $street = $getProperty('getStreet');
+                        $town = $getProperty('getTown');
+                        $phone = $getProperty('getPhone');
+                        $comment = $getProperty('getComment');
+
                         $venues[] = [
-                            'name' => method_exists($venue, 'getName') ? $venue->getName() : ($venue->name ?? ''),
-                            'street' => method_exists($venue, 'getStreet') ? $venue->getStreet() : ($venue->street ?? ''),
-                            'town' => method_exists($venue, 'getTown') ? $venue->getTown() : ($venue->town ?? ''),
-                            'phone' => method_exists($venue, 'getPhone') ? $venue->getPhone() : ($venue->phone ?? ''),
-                            'comment' => method_exists($venue, 'getComment') ? $venue->getComment() : ($venue->comment ?? ''),
-                            'fullAddress' => ((method_exists($venue, 'getStreet') ? $venue->getStreet() : ($venue->street ?? '')) . ', ' . (method_exists($venue, 'getTown') ? $venue->getTown() : ($venue->town ?? '')))
+                            'name' => $name,
+                            'street' => $street,
+                            'town' => $town,
+                            'phone' => $phone,
+                            'comment' => $comment,
+                            'fullAddress' => trim($street . ', ' . $town, ', ')
                         ];
                     }
 
