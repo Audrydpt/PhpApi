@@ -60,12 +60,12 @@ try {
                     $venues = [];
                     foreach ($venueEntries as $venue) {
                         $venues[] = [
-                            'name' => $venue->getName(),
-                            'street' => $venue->getStreet(),
-                            'town' => $venue->getTown(),
-                            'phone' => $venue->getPhone(),
-                            'comment' => $venue->getComment(),
-                            'fullAddress' => $venue->getStreet() . ', ' . $venue->getTown()
+                            'name' => method_exists($venue, 'getName') ? $venue->getName() : ($venue->name ?? ''),
+                            'street' => method_exists($venue, 'getStreet') ? $venue->getStreet() : ($venue->street ?? ''),
+                            'town' => method_exists($venue, 'getTown') ? $venue->getTown() : ($venue->town ?? ''),
+                            'phone' => method_exists($venue, 'getPhone') ? $venue->getPhone() : ($venue->phone ?? ''),
+                            'comment' => method_exists($venue, 'getComment') ? $venue->getComment() : ($venue->comment ?? ''),
+                            'fullAddress' => ((method_exists($venue, 'getStreet') ? $venue->getStreet() : ($venue->street ?? '')) . ', ' . (method_exists($venue, 'getTown') ? $venue->getTown() : ($venue->town ?? '')))
                         ];
                     }
 
