@@ -21,7 +21,7 @@ try {
     $province = $_GET['province'] ?? null;
 
     if (!$province) {
-        throw new Exception("Paramètre 'province' requis (H, Lx, L, BBW, N)");
+        throw new Exception("Paramètre 'province' requis (H, Lx, L, BBW, N) test");
     }
 
     $validProvinces = ['H', 'Lx', 'L', 'BBW', 'N'];
