@@ -8,12 +8,14 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Yoerioptr\TabtApiClient\Client\Client;
 use Yoerioptr\TabtApiClient\Entries\CredentialsType;
-use Yoerioptr\TabtApiClient\Request\GetTournamentsRequest;
+use Yoerioptr\TabtApiClient\Tabt;
 
 try {
     $client = new Client();
     $credentials = new CredentialsType('username', 'password');
     $client->setCredentials($credentials);
+
+    $tabt = new Tabt($client);
 
     $tournamentId = $_GET['tournamentId'] ?? null;
     $season = $_GET['season'] ?? null;
@@ -22,8 +24,7 @@ try {
     if ($tournamentId) $params['TournamentUniqueIndex'] = $tournamentId;
     if ($season) $params['Season'] = $season;
 
-    $request = new GetTournamentsRequest($params);
-    $getTournamentsResponse = $client->handleRequest($request);
+    $getTournamentsResponse = $tabt->tournaments()->listTournamentsBy($params);
 
     $tournaments = [];
     foreach ($getTournamentsResponse->getTournamentEntries() as $tournament) {
