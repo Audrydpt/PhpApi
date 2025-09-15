@@ -4,6 +4,10 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type');
 
+// Empêcher tout bruit dans la sortie JSON
+error_reporting(E_ALL & ~E_DEPRECATED);
+ini_set('display_errors', '0');
+
 require __DIR__ . '/../vendor/autoload.php';
 
 use Yoerioptr\TabtApiClient\Client\Client;
@@ -20,7 +24,8 @@ try {
     // ID du club CTT Frameries
     $clubId = 'H442';
 
-    $getClubTeamsResponse = $tabt->club()->listTeamsByClub($clubId);
+    // Correction: utiliser clubs() (et non club())
+    $getClubTeamsResponse = $tabt->clubs()->listTeamsByClub($clubId);
 
     $divisions = [];
     $uniqueDivisions = [];
@@ -29,7 +34,7 @@ try {
         $divisionId = $team->getDivisionId();
 
         // Éviter les doublons
-        if (!in_array($divisionId, $uniqueDivisions)) {
+        if (!in_array($divisionId, $uniqueDivisions, true)) {
             $uniqueDivisions[] = $divisionId;
             $divisions[] = [
                 'divisionId' => $divisionId,
@@ -48,7 +53,7 @@ try {
         'data' => $divisions
     ]);
 
-} catch (Exception $e) {
+} catch (\Throwable $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,

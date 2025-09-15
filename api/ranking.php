@@ -1,7 +1,6 @@
 <?php
-error_reporting(E_ERROR | E_PARSE);
 error_reporting(E_ALL & ~E_DEPRECATED);
-ini_set('display_errors', 0);
+ini_set('display_errors', '0');
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -15,26 +14,53 @@ use Yoerioptr\TabtApiClient\Entries\CredentialsType;
 use Yoerioptr\TabtApiClient\Request\GetDivisionRankingRequest;
 
 function getClubDivisions() {
-    // Simuler l'appel à club-divisions.php
-    $clubDivisionsUrl = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . '/club-divisions.php';
+    // URL absolue vers club-divisions.php dans le même dossier
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $basePath = rtrim(dirname($_SERVER['REQUEST_URI'] ?? '/api'), '/\\');
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $clubDivisionsUrl = $scheme . '://' . $host . $basePath . '/club-divisions.php';
 
     $context = stream_context_create([
         'http' => [
             'timeout' => 30,
-            'ignore_errors' => true
+            'ignore_errors' => true,
+            'header' => [
+                'Accept: application/json'
+            ]
         ]
     ]);
 
-    $response = file_get_contents($clubDivisionsUrl, false, $context);
-
-    if ($response === false) {
-        throw new Exception('Impossible de récupérer les divisions du club');
+    $response = @file_get_contents($clubDivisionsUrl, false, $context);
+    $statusLine = isset($http_response_header[0]) ? $http_response_header[0] : '';
+    $statusCode = null;
+    if ($statusLine && preg_match('#HTTP/\S+\s(\d{3})#', $statusLine, $m)) {
+        $statusCode = (int)$m[1];
     }
 
-    $data = json_decode($response, true);
+    if ($response === false) {
+        throw new Exception('Impossible de récupérer les divisions du club' . ($statusCode ? " (HTTP $statusCode)" : ''));
+    }
 
-    if (!$data || !$data['success']) {
-        throw new Exception('Erreur lors de la récupération des divisions: ' . ($data['error'] ?? 'Erreur inconnue'));
+    // Tenter de décoder le JSON proprement
+    $data = null;
+    try {
+        $data = json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+    } catch (\Throwable $e) {
+        $short = substr(preg_replace('/\s+/', ' ', $response), 0, 160);
+        throw new Exception('Réponse non valide de club-divisions' . ($statusCode ? " (HTTP $statusCode)" : '') . ": $short");
+    }
+
+    if (!is_array($data)) {
+        throw new Exception('Format de réponse club-divisions invalide');
+    }
+
+    if (isset($data['success']) && $data['success'] === false) {
+        $msg = isset($data['error']) ? (string)$data['error'] : 'Erreur inconnue';
+        throw new Exception('Erreur club-divisions' . ($statusCode ? " (HTTP $statusCode)" : '') . ': ' . $msg);
+    }
+
+    if (!array_key_exists('data', $data) || !is_array($data['data'])) {
+        throw new Exception('Champ data manquant ou invalide dans la réponse club-divisions');
     }
 
     return $data['data'];
@@ -46,7 +72,8 @@ try {
     $client->setCredentials($credentials);
 
     $divisionId = $_GET['divisionId'] ?? null;
-    $allDivisions = $_GET['all'] ?? false;
+    // Normaliser le booléen (?all=true|false|1|0)
+    $allDivisions = filter_var($_GET['all'] ?? null, FILTER_VALIDATE_BOOLEAN);
 
     if ($allDivisions) {
         // Récupérer les divisions via l'API club-divisions
