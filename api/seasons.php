@@ -16,21 +16,23 @@ try {
     $client->setCredentials($credentials);
 
     $tabt = new Tabt($client);
-    $getSeasonsResponse = $tabt->season()->getSeasons();
+    $getSeasonsResponse = $tabt->seasons()->listSeasons();
 
     $seasons = [];
     foreach ($getSeasonsResponse->getSeasonEntries() as $season) {
         $seasons[] = [
-            'id' => $season->getId(),
+            'season' => $season->getSeason(),
             'name' => $season->getName(),
-            'isCurrent' => $season->getIsCurrent()
+            'isCurrent' => $season->isCurrent(),
         ];
     }
 
     echo json_encode([
         'success' => true,
+        'currentSeason' => $getSeasonsResponse->getCurrentSeason(),
+        'currentSeasonName' => $getSeasonsResponse->getCurrentSeasonName(),
         'count' => count($seasons),
-        'data' => $seasons
+        'data' => $seasons,
     ]);
 
 } catch (Exception $e) {

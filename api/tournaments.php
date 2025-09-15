@@ -35,7 +35,6 @@ try {
             'dateTo' => $tournament->getDateTo()?->format('Y-m-d'),
             'registrationDate' => $tournament->getRegistrationDate()?->format('Y-m-d'),
             'venue' => $tournament->getVenue(),
-            'address' => $tournament->getAddress()
         ];
     }
 
