@@ -23,6 +23,7 @@ try {
     $season = $_GET['season'] ?? null;
     $showDivisionName = $_GET['showDivisionName'] ?? null; // yes|no|short
     $team = $_GET['team'] ?? null; // ex: "A" (ou libellé exact de l'équipe)
+    $divisionCategory = isset($_GET['divisionCategory']) ? (int) $_GET['divisionCategory'] : null; // ex: 3, 37, ...
 
     // Construire la requête générique GetMatches
     $params = [];
@@ -40,6 +41,11 @@ try {
 
     $matches = [];
     foreach ($getMatchesResponse->getTeamMatchesEntries() as $match) {
+        // Filtrage optionnel par divisionCategory (permet de différencier Hommes/Vétérans, etc.)
+        if (!is_null($divisionCategory) && $match->getDivisionCategory() !== $divisionCategory) {
+            continue;
+        }
+
         // Filtrage optionnel par équipe
         if ($team) {
             $teamNorm = strtolower(trim($team));
@@ -104,7 +110,7 @@ try {
 
     echo json_encode([
         'success' => true,
-        'filters' => $params + ['Team' => $team],
+        'filters' => $params + ['Team' => $team, 'DivisionCategory' => $divisionCategory],
         'count' => $getMatchesResponse->getMatchCount(),
         'returned' => count($matches),
         'data' => $matches
