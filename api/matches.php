@@ -40,12 +40,34 @@ try {
 
     $matches = [];
     foreach ($getMatchesResponse->getTeamMatchesEntries() as $match) {
-        // Filtrage optionnel par équipe: on garde si l'équipe correspond au club demandé et au code d'équipe
+        // Filtrage optionnel par équipe
         if ($team) {
-            $isTeamMatch = (
-                ($match->getHomeClub() === $club && $match->getHomeTeam() === $team) ||
-                ($match->getAwayClub() === $club && $match->getAwayTeam() === $team)
-            );
+            $teamNorm = strtolower(trim($team));
+            $isLetter = (strlen($teamNorm) === 1 && ctype_alpha($teamNorm));
+
+            $homeClub = $match->getHomeClub();
+            $awayClub = $match->getAwayClub();
+            $homeTeamNorm = strtolower(trim($match->getHomeTeam() ?? ''));
+            $awayTeamNorm = strtolower(trim($match->getAwayTeam() ?? ''));
+
+            $homeClubMatches = ($homeClub === $club);
+            $awayClubMatches = ($awayClub === $club);
+
+            $endsWithLetter = static function (string $name, string $letter): bool {
+                // correspond si le nom se termine par " A" ou juste "A"
+                if ($name === $letter) return true;
+                return (bool) preg_match('/(?:^|\s)'.preg_quote($letter, '/').'$/', $name);
+            };
+
+            $nameMatchesHome = $isLetter
+                ? $endsWithLetter($homeTeamNorm, $teamNorm)
+                : ($homeTeamNorm === $teamNorm || str_contains($homeTeamNorm, $teamNorm));
+
+            $nameMatchesAway = $isLetter
+                ? $endsWithLetter($awayTeamNorm, $teamNorm)
+                : ($awayTeamNorm === $teamNorm || str_contains($awayTeamNorm, $teamNorm));
+
+            $isTeamMatch = ($homeClubMatches && $nameMatchesHome) || ($awayClubMatches && $nameMatchesAway);
             if (!$isTeamMatch) {
                 continue;
             }
