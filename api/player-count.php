@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ERROR | E_PARSE);
 error_reporting(E_ALL & ~E_DEPRECATED);
 ini_set('display_errors', 0);
 
@@ -12,25 +11,23 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Yoerioptr\TabtApiClient\Client\Client;
 use Yoerioptr\TabtApiClient\Entries\CredentialsType;
-use Yoerioptr\TabtApiClient\Tabt;
+use Yoerioptr\TabtApiClient\Request\GetMembersRequest;
 
 try {
     $client = new Client();
     $credentials = new CredentialsType('username', 'password');
     $client->setCredentials($credentials);
 
-    $tabt = new Tabt($client);
+    $club = $_GET['club'] ?? null;
 
-    $club = $_GET['club'] ?? 'H442';
-
-    $getMembersResponse = $tabt->member()->listMembersBy(['Club' => $club]);
-
-    $count = count($getMembersResponse->getMemberEntries());
+    $params = $club ? ['Club' => $club] : [];
+    $request = new GetMembersRequest($params);
+    $response = $client->handleRequest($request);
 
     echo json_encode([
         'success' => true,
-        'club' => $club,
-        'totalPlayers' => $count
+        'club' => $club ?? 'all',
+        'totalPlayers' => $response->getMemberCount()
     ]);
 } catch (Exception $e) {
     http_response_code(500);

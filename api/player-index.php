@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ERROR | E_PARSE);
 error_reporting(E_ALL & ~E_DEPRECATED);
 ini_set('display_errors', 0);
 
@@ -12,21 +11,20 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Yoerioptr\TabtApiClient\Client\Client;
 use Yoerioptr\TabtApiClient\Entries\CredentialsType;
-use Yoerioptr\TabtApiClient\Tabt;
+use Yoerioptr\TabtApiClient\Request\GetMembersRequest;
 
 try {
     $client = new Client();
     $credentials = new CredentialsType('username', 'password');
     $client->setCredentials($credentials);
 
-    $tabt = new Tabt($client);
-
     $clubId = 'H442';
 
-    $getMembersResponse = $tabt->member()->listMembersBy(['Club' => $clubId]);
+    $request = new GetMembersRequest(['Club' => $clubId]);
+    $response = $client->handleRequest($request);
 
     $players = [];
-    foreach ($getMembersResponse->getMemberEntries() as $member) {
+    foreach ($response->getMemberEntries() as $member) {
         $players[] = [
             'uniqueIndex' => $member->getUniqueIndex(),
             'rankingIndex' => $member->getRankingIndex(),
