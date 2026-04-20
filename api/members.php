@@ -25,16 +25,32 @@ try {
 
     $getMembersResponse = $tabt->members()->listMembersBy(['Club' => $clubId]);
 
-    $members = [];
+$members = [];
     foreach ($getMembersResponse->getMemberEntries() as $member) {
-        $members[] = [
+        $memberData = [
             'position' => $member->getPosition(),
             'uniqueIndex' => $member->getUniqueIndex(),
             'rankingIndex' => $member->getRankingIndex(),
             'firstName' => $member->getFirstName(),
             'lastName' => $member->getLastName(),
             'ranking' => $member->getRanking(),
+            'status' => $member->getStatus(),
+            'club' => $member->getClub(),
+            'gender' => $member->getGender(),
+            'category' => $member->getCategory(),
+            'birthDate' => $member->getBirthDate(),
+            'medicalAttestation' => $member->getMedicalAttestation(),
+            'rankingPointsCount' => $member->getRankingPointsCount(),
+            'rankingPointsEntries' => $member->getRankingPointsEntries(),
+            'email' => $member->getEmail(),
+            'phone' => $member->getPhone(),
+            'address' => $member->getAddress(),
+            'resultCount' => $member->getResultCount(),
+            'resultEntries' => $member->getResultEntries(),
+            'nationalNumber' => $member->getNationalNumber(),
         ];
+
+        $members[] = $memberData;
     }
 
     echo json_encode([
