@@ -23,7 +23,7 @@ try {
 
     $clubId = 'H442'; // Remplace par l'ID de ton club
 
-    $getMembersResponse = $tabt->member()->listMembersBy(['Club' => $clubId]);
+    $getMembersResponse = $tabt->members()->listMembersBy(['Club' => $clubId]);
 
     $members = [];
     foreach ($getMembersResponse->getMemberEntries() as $member) {
