@@ -21,19 +21,15 @@ try {
 
     $tabt = new Tabt($client);
 
-    $params = [];
-    $club = $_GET['club'] ?? null;
-    if ($club) {
-        $params['Club'] = $club;
-    }
+    $club = $_GET['club'] ?? 'H442';
 
-    $getMembersResponse = $tabt->member()->listMembersBy($params);
+    $getMembersResponse = $tabt->member()->listMembersBy(['Club' => $club]);
 
     $count = count($getMembersResponse->getMemberEntries());
 
     echo json_encode([
         'success' => true,
-        'club' => $club ?? 'all',
+        'club' => $club,
         'totalPlayers' => $count
     ]);
 } catch (Exception $e) {
