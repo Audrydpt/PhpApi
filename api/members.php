@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ERROR | E_PARSE);
 error_reporting(E_ALL & ~E_DEPRECATED);
 ini_set('display_errors', 0);
 
@@ -12,57 +11,54 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Yoerioptr\TabtApiClient\Client\Client;
 use Yoerioptr\TabtApiClient\Entries\CredentialsType;
-use Yoerioptr\TabtApiClient\Tabt;
+use Yoerioptr\TabtApiClient\Request\GetMembersRequest;
 
 try {
     $client = new Client();
-    $credentials = new CredentialsType('username', 'password'); // Remplace par tes identifiants
+    $credentials = new CredentialsType('username', 'password');
     $client->setCredentials($credentials);
 
-    $tabt = new Tabt($client);
+    $params = [];
+    if (isset($_GET['club']))          $params['Club']          = $_GET['club'];
+    if (isset($_GET['season']))        $params['Season']        = (int)$_GET['season'];
+    if (isset($_GET['uniqueIndex']))   $params['UniqueIndex']   = (int)$_GET['uniqueIndex'];
+    if (isset($_GET['nameSearch']))    $params['NameSearch']    = $_GET['nameSearch'];
+    if (isset($_GET['withResults']))   $params['WithResults']   = filter_var($_GET['withResults'], FILTER_VALIDATE_BOOLEAN);
 
-    $clubId = 'H442'; // Remplace par l'ID de ton club
+    if (empty($params['Club']) && empty($params['UniqueIndex']) && empty($params['NameSearch'])) {
+        $params['Club'] = 'H442';
+    }
 
-    $getMembersResponse = $tabt->members()->listMembersBy(['Club' => $clubId]);
+    $request = new GetMembersRequest($params);
+    $getMembersResponse = $client->handleRequest($request);
 
-$members = [];
-    foreach ($getMembersResponse->getMemberEntries() as $member) {
-        $memberData = [
-            'position' => $member->getPosition(),
-            'uniqueIndex' => $member->getUniqueIndex(),
+    $members = [];
+    foreach ($getMembersResponse->getMemberEntries() ?? [] as $member) {
+        $members[] = [
+            'position'     => $member->getPosition(),
+            'uniqueIndex'  => $member->getUniqueIndex(),
             'rankingIndex' => $member->getRankingIndex(),
-            'firstName' => $member->getFirstName(),
-            'lastName' => $member->getLastName(),
-            'ranking' => $member->getRanking(),
-            'status' => $member->getStatus(),
-            'club' => $member->getClub(),
-            'gender' => $member->getGender(),
-            'category' => $member->getCategory(),
-            'birthDate' => $member->getBirthDate(),
-            'medicalAttestation' => $member->getMedicalAttestation(),
-            'rankingPointsCount' => $member->getRankingPointsCount(),
-            'rankingPointsEntries' => $member->getRankingPointsEntries(),
-            'email' => $member->getEmail(),
-            'phone' => $member->getPhone(),
-            'address' => $member->getAddress(),
-            'resultCount' => $member->getResultCount(),
-            'resultEntries' => $member->getResultEntries(),
-            'nationalNumber' => $member->getNationalNumber(),
+            'firstName'    => $member->getFirstName(),
+            'lastName'     => $member->getLastName(),
+            'ranking'      => $member->getRanking(),
+            'status'       => $member->getStatus(),
+            'club'         => $member->getClub(),
+            'gender'       => $member->getGender(),
+            'category'     => $member->getCategory(),
+            'birthDate'    => $member->getBirthDate(),
         ];
-
-        $members[] = $memberData;
     }
 
     echo json_encode([
         'success' => true,
-        'clubId' => $clubId,
-        'count' => count($members),
-        'data' => $members
+        'clubId'  => $params['Club'] ?? null,
+        'count'   => count($members),
+        'data'    => $members
     ]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => $e->getMessage()
+        'error'   => $e->getMessage()
     ]);
 }
