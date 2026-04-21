@@ -35,17 +35,11 @@ try {
     $members = [];
     foreach ($getMembersResponse->getMemberEntries() ?? [] as $member) {
         $members[] = [
-            'position'     => $member->getPosition(),
-            'uniqueIndex'  => $member->getUniqueIndex(),
-            'rankingIndex' => $member->getRankingIndex(),
-            'firstName'    => $member->getFirstName(),
-            'lastName'     => $member->getLastName(),
-            'ranking'      => $member->getRanking(),
-            'status'       => $member->getStatus(),
-            'club'         => $member->getClub(),
-            'gender'       => $member->getGender(),
-            'category'     => $member->getCategory(),
-            'birthDate'    => $member->getBirthDate(),
+            'position'    => $member->getPosition(),
+            'uniqueIndex' => $member->getUniqueIndex(),
+            'firstName'   => $member->getFirstName(),
+            'lastName'    => $member->getLastName(),
+            'ranking'     => $member->getRanking(),
         ];
     }
 
@@ -55,7 +49,7 @@ try {
         'count'   => count($members),
         'data'    => $members
     ]);
-} catch (Exception $e) {
+} catch (\Throwable $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
