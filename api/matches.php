@@ -1,4 +1,9 @@
 <?php
+// Un avertissement PHP affiche du HTML avant le JSON et rend la reponse
+// impossible a parser cote client. Les erreurs restent journalisees.
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
@@ -116,7 +121,7 @@ try {
         'data' => $matches
     ]);
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,

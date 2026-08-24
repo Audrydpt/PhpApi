@@ -1,4 +1,9 @@
 <?php
+// Un avertissement PHP affiche du HTML avant le JSON et rend la reponse
+// impossible a parser cote client. Les erreurs restent journalisees.
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
@@ -47,6 +52,11 @@ try {
             'medicalAttestation' => $member->getMedicalAttestation(),
             'email'              => $member->getEmail(),
             'nationalNumber'     => $member->getNationalNumber(),
+            // Resultats individuels du joueur, renvoyes par TabT lorsque
+            // ?withResults=1 est passe. Ils etaient recuperes par la
+            // bibliotheque puis jetes ici avant serialisation.
+            'resultCount'        => $member->getResultCount(),
+            'resultEntries'      => $member->getResultEntries(),
         ];
     }
 
@@ -57,7 +67,7 @@ try {
         'data'    => $members,
     ]);
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
