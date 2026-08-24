@@ -21,8 +21,11 @@ try {
 
     $tabt = new Tabt($client);
 
-    // ID du club CTT Frameries
-    $clubId = 'H442';
+    // Club interroge : ?club=XNNN, avec CTT Frameries par defaut.
+    // Etait ecrit en dur, ce qui rendait le parametre sans effet.
+    $clubId = isset($_GET['club']) && $_GET['club'] !== ''
+        ? $_GET['club']
+        : 'H442';
 
     // Correction: utiliser clubs() (et non club())
     $getClubTeamsResponse = $tabt->clubs()->listTeamsByClub($clubId);
@@ -32,6 +35,7 @@ try {
 
     foreach ($getClubTeamsResponse->getTeamEntries() as $team) {
         $divisionId = $team->getDivisionId();
+
 
         // Éviter les doublons
         if (!in_array($divisionId, $uniqueDivisions, true)) {

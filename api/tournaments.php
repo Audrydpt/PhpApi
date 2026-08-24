@@ -34,7 +34,16 @@ try {
             'dateFrom' => $tournament->getDateFrom()?->format('Y-m-d'),
             'dateTo' => $tournament->getDateTo()?->format('Y-m-d'),
             'registrationDate' => $tournament->getRegistrationDate()?->format('Y-m-d'),
-            'venue' => $tournament->getVenue(),
+            // TabT renvoie le lieu en JSON encode dans une chaine : sans ce
+            // decodage, tout client doit parser deux fois. Repli sur la valeur
+            // brute si ce n'est pas du JSON valide.
+            'venue' => (static function ($raw) {
+                if (!is_string($raw) || $raw === '') {
+                    return $raw;
+                }
+                $decoded = json_decode($raw, true);
+                return json_last_error() === JSON_ERROR_NONE ? $decoded : $raw;
+            })($tournament->getVenue()),
         ];
     }
 
