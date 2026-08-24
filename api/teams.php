@@ -1,4 +1,9 @@
 <?php
+// Un avertissement PHP affiche du HTML avant le JSON et rend la reponse
+// impossible a parser cote client. Les erreurs restent journalisees.
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
@@ -15,7 +20,15 @@ try {
     $client->setCredentials($credentials);
 
     $tabt = new Tabt($client);
-    $getClubTeamsResponse = $tabt->club()->listTeamsByClub('H442');
+
+    // Club interroge : ?club=XNNN, avec CTT Frameries par defaut.
+    $clubId = isset($_GET['club']) && $_GET['club'] !== ''
+        ? $_GET['club']
+        : 'H442';
+
+    // Tabt n'expose pas club() mais clubs() : cet appel levait un
+    // "Call to undefined method" a chaque requete.
+    $getClubTeamsResponse = $tabt->clubs()->listTeamsByClub($clubId);
 
     $teams = [];
     foreach ($getClubTeamsResponse->getTeamEntries() as $team) {
@@ -31,12 +44,13 @@ try {
 
     echo json_encode([
         'success' => true,
+        'clubId' => $clubId,
         'clubName' => $getClubTeamsResponse->getClubName(),
         'count' => $getClubTeamsResponse->getTeamCount(),
         'data' => $teams
     ]);
 
-} catch (Exception $e) {
+} catch (\Throwable $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,

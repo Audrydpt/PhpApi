@@ -32,22 +32,10 @@ try {
 
     $divisions = [];
     $uniqueDivisions = [];
-    $teams = [];
 
     foreach ($getClubTeamsResponse->getTeamEntries() as $team) {
         $divisionId = $team->getDivisionId();
 
-        // Une entree par equipe, sans deduplication : deux equipes du meme
-        // club peuvent partager une division (Frameries I et M sont toutes
-        // deux en 9661). Dedupliquer par divisionId en fait disparaitre une.
-        $teams[] = [
-            'teamId' => $team->getTeamId(),
-            'team' => $team->getTeam(),
-            'divisionId' => $divisionId,
-            'divisionName' => $team->getDivisionName(),
-            'divisionCategory' => $team->getDivisionCategory(),
-            'matchType' => $team->getMatchType()
-        ];
 
         // Éviter les doublons
         if (!in_array($divisionId, $uniqueDivisions, true)) {
@@ -66,11 +54,7 @@ try {
         'clubName' => $getClubTeamsResponse->getClubName(),
         'clubId' => $clubId,
         'count' => count($divisions),
-        'data' => $divisions,
-        // Ajout additif : `data` garde sa forme historique, `teams` porte
-        // la lettre d'equipe, seule facon de relier une equipe a sa division.
-        'teamCount' => count($teams),
-        'teams' => $teams
+        'data' => $divisions
     ]);
 
 } catch (\Throwable $e) {
