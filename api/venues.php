@@ -99,6 +99,12 @@ try {
         }
     }
 
+    // L'API SOAP de l'AFTT met une a quatre secondes a repondre. Le CDN
+    // garde donc la reponse un jour, puis sert la version perimee
+    // pendant une semaine en la rafraichissant en arriere-plan.
+    // Pose ici et non en tete de fichier : une erreur 500 ne doit
+    // jamais etre mise en cache.
+    header('Cache-Control: public, s-maxage=86400, stale-while-revalidate=604800');
     echo json_encode([
         'success' => true,
         'province' => $province,

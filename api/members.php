@@ -60,6 +60,12 @@ try {
         ];
     }
 
+    // L'API SOAP de l'AFTT met une a quatre secondes a repondre. Le CDN
+    // garde donc la reponse une heure, puis sert la version perimee
+    // pendant 24 h en la rafraichissant en arriere-plan.
+    // Pose ici et non en tete de fichier : une erreur 500 ne doit
+    // jamais etre mise en cache.
+    header('Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400');
     echo json_encode([
         'success' => true,
         'clubId'  => $params['Club'] ?? null,
