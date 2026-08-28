@@ -129,7 +129,7 @@ try {
         // pendant 24 h en la rafraichissant en arriere-plan.
         // Pose ici et non en tete de fichier : une erreur 500 ne doit
         // jamais etre mise en cache.
-        header('Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400');
+        header('Cache-Control: public, s-maxage=3600, stale-while-revalidate=604800');
         echo json_encode([
             'success' => true,
             'clubId' => 'H442',
@@ -166,7 +166,7 @@ try {
         // pendant 24 h en la rafraichissant en arriere-plan.
         // Pose ici et non en tete de fichier : une erreur 500 ne doit
         // jamais etre mise en cache.
-        header('Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400');
+        header('Cache-Control: public, s-maxage=3600, stale-while-revalidate=604800');
         echo json_encode([
             'success' => true,
             'divisionName' => $getDivisionRankingResponse->getDivisionName(),
